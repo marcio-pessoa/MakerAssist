@@ -1,0 +1,34 @@
+---
+- name: Install/update Maker Assist
+  hosts: all
+  vars:
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    dest: /opt
+    path: makerassist
+  tasks:
+    - name: pip - Install API dependencies
+      become: true
+      pip:
+        name: [
+          termcolor,
+          psutil,
+          pyserial
+        ]
+      tags: pip
+    - name: Filesystem - Create work directory if it does not exist
+      become: true
+      file:
+        path: "{{ dest }}/{{ path }}"
+        state: directory
+        mode: '0755'
+        owner: "{{ owner }}"
+        group: "{{ group }}"
+      tags: filesystem
+    - name: Install - Copy files
+      synchronize:
+        src: .
+        dest: "{{ dest }}"
+        delete: yes
+        dirs: yes
+      tags: copy

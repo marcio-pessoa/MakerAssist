@@ -1,0 +1,6 @@
+[submodule "tools/echo"]
+	path = tools/echo
+	url = https://github.com/marcio-pessoa/pyecho.git
+[submodule "tools/file"]
+	path = tools/file
+	url = https://github.com/marcio-pessoa/pyfile.git

@@ -29,9 +29,9 @@ try:
     import subprocess
     # Myself modules
     import tools.echo.echo as echo
-    from tools.device import DeviceProperties
+    from tools.device.device import DeviceProperties
     from tools.file.file import File
-    from tools.session import Session
+    from tools.session.session import Session
 except ImportError as err:
     print("Could not load module. " + str(err))
     sys.exit(True)
@@ -124,23 +124,23 @@ class UserArgumentParser():  # pylint: disable=too-many-instance-attributes
         parser.add_argument(
             '-v', '--verbosity',
             type=int,
-            default=1,
+            default=3,
             choices=[0, 1, 2, 3, 4],
             help='verbose mode, options: ' +
             '0 Quiet, 1 Errors (default), 2 Warnings, 3 Info, 4 Debug')
         args = parser.parse_args(sys.argv[2:])
         echo.level(args.verbosity)
         echo.infoln(self.version)
-        self.__all_devices = args.all
         if args.date:
             echo.infoln('Started at: ' + time.strftime('%Y-%m-%d %H:%M:%S'))
         self.__load_configuration()
         self.__device = DeviceProperties(self.__config.get())
+        self.__all_devices = args.all
         device_input = [args.id]
-        if (not device_input[0]) or (args.all):
+        if (not device_input[0]) or (self.__all_devices):
             device_input = self.__device.list()
-        for device_id in device_input:
-            self.__device.set(device_id)
+        for self.__id in device_input:
+            self.__device.set(self.__id)
             if not self.__device.is_enable():
                 continue
             echo.infoln('Device...')
@@ -169,18 +169,18 @@ class UserArgumentParser():  # pylint: disable=too-many-instance-attributes
         parser.add_argument(
             '-v', '--verbosity',
             type=int,
-            default=1,
+            default=3,
             choices=[0, 1, 2, 3, 4],
             help='verbose mode, options: ' +
             '0 Quiet, 1 Errors, 2 Warnings, 3 Info (default), 4 Debug')
         args = parser.parse_args(sys.argv[2:])
         echo.level(args.verbosity)
         echo.infoln(self.version)
-        self.__id = args.id
         if args.date:
             echo.infoln('Started at: ' + time.strftime('%Y-%m-%d %H:%M:%S'))
         self.__load_configuration()
         self.__device = DeviceProperties(self.__config.get())
+        self.__id = args.id
         self.__device.set(self.__id)
         echo.infoln('Device...')
         echo.infoln(self.__device.info())
@@ -190,7 +190,7 @@ class UserArgumentParser():  # pylint: disable=too-many-instance-attributes
         echo.header(True)
         self.__session = Session(self.__device.get_comm())
         if not self.__session.is_connected():
-            echo.erroln('Serial device is not connected.')
+            echo.erroln('Not connected.')
             sys.exit(True)
         self.__firmware.upload()
 
@@ -250,7 +250,7 @@ class UserArgumentParser():  # pylint: disable=too-many-instance-attributes
             echo.warn("\t" +
                       device.system_plat + "\t" +
                       device.system_mark)
-            system_desc = device.system_desc  # FIXME: Can't use internal device variable
+            system_desc = device.get_system()['desc']
             if len(system_desc) < 16:
                 for _ in range(16-len(device.system_desc)):
                     system_desc += ' '
@@ -264,27 +264,6 @@ class UserArgumentParser():  # pylint: disable=too-many-instance-attributes
         self.__config = File()
         self.__config.load(self.__config_file, 'json')
 
-    def __device_select(self, device_id=None):  # TODO: Remove
-        echo.infoln('Device...')
-        self.__device = DeviceProperties(self.__config.get())
-        if device_id:
-            self.__id = device_id
-            self.__device.set(self.__id)
-            self.__device.info()
-            return
-        devices_list = self.__device.detect()
-        devices = len(self.__device.detect())
-        if devices < 1:
-            echo.erroln('Not connected.')
-            sys.exit(True)
-        if devices > 1:
-            echo.erroln('Too many connected devices: %s', str(devices_list))
-            sys.exit(True)
-        if devices == 1:
-            self.__id = self.__device.get_id()
-            self.__device.info()
-            return
-
 
 class Firmware:  # pylint: disable=too-many-instance-attributes
     """
@@ -292,6 +271,7 @@ class Firmware:  # pylint: disable=too-many-instance-attributes
     """
 
     def __init__(self, data):
+        self.data = data
         self.__arduino_program = "arduino"
         self.__pylint = "pylint"
         self.platform = None
@@ -311,7 +291,6 @@ class Firmware:  # pylint: disable=too-many-instance-attributes
         self.terminal_end_of_line = 'LF'
         self.interface = 'serial'
         self.destination = ''
-        self.data = data
         self.__set()
 
     def __set(self):

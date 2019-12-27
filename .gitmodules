@@ -4,3 +4,9 @@
 [submodule "tools/file"]
 	path = tools/file
 	url = https://github.com/marcio-pessoa/pyfile.git
+[submodule "tools/device"]
+	path = tools/device
+	url = https://github.com/marcio-pessoa/pydevice.git
+[submodule "tools/session"]
+	path = tools/session
+	url = https://github.com/marcio-pessoa/pysession.git

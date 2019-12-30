@@ -3,6 +3,10 @@
 ## Change log
 All notable changes to this project will be documented in this file.
 
+### [0.9] - 2019-12-30
+#### Fixed
+- Command verify not reporting error for unknown devices.
+
 ### [0.89] - 2019-12-22
 #### Fixed
 - Command list output when runing on verbosity Critical.

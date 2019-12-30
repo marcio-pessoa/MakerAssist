@@ -36,10 +36,10 @@ except ImportError as err:
     print("Could not load module. " + str(err))
     sys.exit(True)
 
-__version__ = 0.89
+__version__ = 0.9
 
 
-class UserArgumentParser():  # pylint: disable=too-many-instance-attributes
+class MakerAssist():  # pylint: disable=too-many-instance-attributes
     """
     description:
     reference:
@@ -133,6 +133,7 @@ class UserArgumentParser():  # pylint: disable=too-many-instance-attributes
         echo.infoln(self.version)
         if args.date:
             echo.infoln('Started at: ' + time.strftime('%Y-%m-%d %H:%M:%S'))
+        echo.infoln('Loading configuration...')
         self.__load_configuration()
         self.__device = DeviceProperties(self.__config.get())
         self.__all_devices = args.all
@@ -140,10 +141,16 @@ class UserArgumentParser():  # pylint: disable=too-many-instance-attributes
         if (not device_input[0]) or (self.__all_devices):
             device_input = self.__device.list()
         for self.__id in device_input:
-            self.__device.set(self.__id)
-            if not self.__device.is_enable():
+            error = False
+            if self.__device.set(self.__id) is None:
+                error = self.__id + ' not found in configuration file.'
+            if not self.__device.is_enable() and not error:
                 continue
             echo.infoln('Device...')
+            echo.info('    ')
+            if error:
+                echo.erroln(error)
+                sys.exit(True)
             echo.infoln(self.__device.info())
             echo.infoln('Project...')
             self.__firmware = Firmware(self.__device.get())
@@ -178,6 +185,7 @@ class UserArgumentParser():  # pylint: disable=too-many-instance-attributes
         echo.infoln(self.version)
         if args.date:
             echo.infoln('Started at: ' + time.strftime('%Y-%m-%d %H:%M:%S'))
+        echo.infoln('Loading configuration...')
         self.__load_configuration()
         self.__device = DeviceProperties(self.__config.get())
         self.__id = args.id
@@ -260,7 +268,6 @@ class UserArgumentParser():  # pylint: disable=too-many-instance-attributes
         sys.exit(False)
 
     def __load_configuration(self):
-        echo.infoln('Loading configuration...')
         self.__config = File()
         self.__config.load(self.__config_file, 'json')
 
@@ -462,7 +469,7 @@ def main():
     """
     description:
     """
-    UserArgumentParser()
+    MakerAssist()
 
 
 if __name__ == '__main__':

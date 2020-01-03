@@ -36,7 +36,7 @@ except ImportError as err:
     print("Could not load module. " + str(err))
     sys.exit(True)
 
-__version__ = 0.9
+__version__ = 0.91
 
 
 class MakerAssist():  # pylint: disable=too-many-instance-attributes
@@ -50,9 +50,9 @@ class MakerAssist():  # pylint: disable=too-many-instance-attributes
 
     def __init__(self):
         self.program_name = "ma"
-        self.program_date = "2019-12-22"
+        self.program_date = "2020-01-02"
         self.program_description = "ma - Maker Assist"
-        self.program_copyright = "Copyright (c) 2014-2019 Marcio Pessoa"
+        self.program_copyright = "Copyright (c) 2014-2020 Marcio Pessoa"
         self.program_license = "GPLv2. There is NO WARRANTY."
         self.program_website = "https://github.com/marcio-pessoa/makerassist"
         self.program_contact = "Marcio Pessoa <marcio.pessoa@gmail.com>"

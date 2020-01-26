@@ -7,6 +7,17 @@
     dest: /opt
     path: makerassist
   tasks:
+    - name: APT - Install dependencies on Ubuntu
+      become: true
+      apt:
+        package: [
+          python3-pip
+        ]
+        state: present
+        cache_valid_time: 3600
+        force_apt_get: yes
+        update_cache: yes
+      tags: apt
     - name: pip - Install API dependencies
       become: true
       pip:
@@ -15,6 +26,7 @@
           psutil,
           pyserial
         ]
+        executable: pip3
       tags: pip
     - name: Filesystem - Create work directory if it does not exist
       become: true
